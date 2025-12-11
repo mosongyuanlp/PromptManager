@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Asset, Version } from '../types';
 import { ArrowLeft, Copy, Edit2, History, Check, GitCompare, X, Split } from 'lucide-react';
 import { diffWords } from 'diff';
+import { useTranslation } from '../contexts/LanguageContext';
 
 interface AssetDetailProps {
   asset: Asset;
@@ -10,6 +11,7 @@ interface AssetDetailProps {
 }
 
 export const AssetDetail: React.FC<AssetDetailProps> = ({ asset, onBack, onEdit }) => {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
   
   // State for viewing
@@ -111,7 +113,7 @@ export const AssetDetail: React.FC<AssetDetailProps> = ({ asset, onBack, onEdit 
              }`}
            >
              {isComparing ? <X size={16} /> : <GitCompare size={16} />}
-             <span>{isComparing ? 'Exit Compare' : 'Compare'}</span>
+             <span>{isComparing ? t('exitCompare') : t('compare')}</span>
            </button>
            
            {!isComparing && (
@@ -120,7 +122,7 @@ export const AssetDetail: React.FC<AssetDetailProps> = ({ asset, onBack, onEdit 
                className="flex items-center space-x-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-slate-200 transition-all text-sm"
              >
                <Edit2 size={16} />
-               <span>Edit</span>
+               <span>{t('edit')}</span>
              </button>
            )}
         </div>
@@ -145,7 +147,7 @@ export const AssetDetail: React.FC<AssetDetailProps> = ({ asset, onBack, onEdit 
                          {new Date(comparisonData.older.timestamp).toLocaleDateString()}
                        </span>
                     </div>
-                    <span className="text-xs text-slate-500 font-mono">Original</span>
+                    <span className="text-xs text-slate-500 font-mono">{t('original')}</span>
                   </div>
                   
                   <div className="flex-1 bg-slate-900 border border-slate-700 rounded-lg overflow-auto p-4 text-sm font-mono text-slate-400 leading-relaxed whitespace-pre-wrap">
@@ -174,7 +176,7 @@ export const AssetDetail: React.FC<AssetDetailProps> = ({ asset, onBack, onEdit 
                          {new Date(comparisonData.newer.timestamp).toLocaleDateString()}
                        </span>
                     </div>
-                    <span className="text-xs text-slate-500 font-mono">Modified</span>
+                    <span className="text-xs text-slate-500 font-mono">{t('modified')}</span>
                   </div>
                   
                   <div className="flex-1 bg-slate-900 border border-slate-700 rounded-lg overflow-auto p-4 text-sm font-mono text-slate-300 leading-relaxed whitespace-pre-wrap">
@@ -197,14 +199,14 @@ export const AssetDetail: React.FC<AssetDetailProps> = ({ asset, onBack, onEdit 
             <>
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wider">
-                  Content ({primaryVersion.version})
+                  {t('content')} ({primaryVersion.version})
                 </h3>
                 <button 
                   onClick={handleCopy}
                   className="flex items-center space-x-1 text-xs text-primary-400 hover:text-primary-300 transition-colors"
                 >
                   {copied ? <Check size={14} /> : <Copy size={14} />}
-                  <span>{copied ? 'Copied' : 'Copy Code'}</span>
+                  <span>{copied ? t('copied') : t('copy')}</span>
                 </button>
               </div>
               
@@ -215,7 +217,7 @@ export const AssetDetail: React.FC<AssetDetailProps> = ({ asset, onBack, onEdit 
               </div>
               
               <div className="mt-4 p-4 bg-slate-800/30 border border-slate-700/50 rounded-lg">
-                 <h4 className="text-sm font-semibold text-slate-400 mb-1">Changelog / Notes</h4>
+                 <h4 className="text-sm font-semibold text-slate-400 mb-1">{t('changelog')}</h4>
                  <p className="text-slate-300 text-sm">{primaryVersion.changelog}</p>
               </div>
             </>
@@ -227,13 +229,13 @@ export const AssetDetail: React.FC<AssetDetailProps> = ({ asset, onBack, onEdit 
           <div className="flex items-center justify-between mb-4">
              <div className="flex items-center gap-2 text-slate-100 font-semibold">
                 <History size={18} />
-                <h2>History</h2>
+                <h2>{t('history')}</h2>
              </div>
           </div>
           
           {isComparing && !compareVersion && (
             <div className="mb-4 p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-lg text-xs text-indigo-300 animate-pulse">
-              Select a version below to compare with <strong>v{primaryVersion.version}</strong>
+              {t('selectToCompare')} <strong>v{primaryVersion.version}</strong>
             </div>
           )}
           

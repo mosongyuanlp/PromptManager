@@ -11,17 +11,20 @@ const getAIClient = () => {
   return new GoogleGenAI({ apiKey });
 };
 
-export const generateSuggestions = async (content: string, type: 'PROMPT' | 'IDEA') => {
+export const generateSuggestions = async (content: string, type: 'PROMPT' | 'IDEA', language: 'en' | 'zh' = 'en') => {
   try {
     const ai = getAIClient();
     const model = "gemini-2.5-flash"; // Fast model for UI interactions
     
     let prompt = "";
+    const langInstruction = language === 'zh' ? "Please reply in Chinese (Simplified)." : "Please reply in English.";
+
     if (type === 'IDEA') {
       prompt = `
         Role: Prompt Lifecycle Architect.
         Task: Analyze the following idea and suggest a structured prompt direction.
         Output: A short paragraph suggesting how to convert this idea into a robust prompt, including suggested category and tags.
+        ${langInstruction}
         
         Idea: "${content}"
       `;
@@ -30,6 +33,7 @@ export const generateSuggestions = async (content: string, type: 'PROMPT' | 'IDE
         Role: Prompt Lifecycle Architect.
         Task: Analyze the following prompt for logic loopholes or improvements.
         Output: Bullet points of concise critique and optimization suggestions.
+        ${langInstruction}
         
         Prompt: "${content}"
       `;
@@ -44,9 +48,9 @@ export const generateSuggestions = async (content: string, type: 'PROMPT' | 'IDE
   } catch (error: any) {
     console.error("Gemini API Error:", error);
     if (error.message?.includes("API Key")) {
-        return "Error: Missing API Key. Please add your Google Gemini API Key in Settings.";
+        return language === 'zh' ? "错误：缺少 API Key。请在设置中添加您的 Google Gemini API Key。" : "Error: Missing API Key. Please add your Google Gemini API Key in Settings.";
     }
-    return "AI Assistant unavailable. Please check your API configuration.";
+    return language === 'zh' ? "AI 助手暂时不可用，请检查配置。" : "AI Assistant unavailable. Please check your API configuration.";
   }
 };
 

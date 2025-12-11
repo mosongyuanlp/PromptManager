@@ -3,6 +3,7 @@ import { Asset, AssetType } from '../types';
 import { INITIAL_CATEGORIES } from '../constants';
 import { ArrowLeft, Save, Sparkles, Wand2 } from 'lucide-react';
 import { generateSuggestions, autoCategorize } from '../services/geminiService';
+import { useTranslation } from '../contexts/LanguageContext';
 
 interface AssetFormProps {
   initialAsset?: Asset | null; // If null, creating new
@@ -12,6 +13,7 @@ interface AssetFormProps {
 }
 
 export const AssetForm: React.FC<AssetFormProps> = ({ initialAsset, onSubmit, onCancel, nextId }) => {
+  const { t, language } = useTranslation();
   const isEditing = !!initialAsset;
   
   const [type, setType] = useState<AssetType>(initialAsset?.type || AssetType.PROMPT);
@@ -39,7 +41,7 @@ export const AssetForm: React.FC<AssetFormProps> = ({ initialAsset, onSubmit, on
       id: initialAsset ? initialAsset.id : nextId,
       type,
       title,
-      category: category || "Uncategorized",
+      category: category || t('uncategorized'),
       tags: tagArray,
       content,
     }, changelog);
@@ -49,7 +51,7 @@ export const AssetForm: React.FC<AssetFormProps> = ({ initialAsset, onSubmit, on
     if (!content) return;
     setIsThinking(true);
     setAiSuggestion(null);
-    const suggestion = await generateSuggestions(content, type === AssetType.IDEA ? 'IDEA' : 'PROMPT');
+    const suggestion = await generateSuggestions(content, type === AssetType.IDEA ? 'IDEA' : 'PROMPT', language);
     setAiSuggestion(suggestion);
     setIsThinking(false);
   };
@@ -81,7 +83,7 @@ export const AssetForm: React.FC<AssetFormProps> = ({ initialAsset, onSubmit, on
             <ArrowLeft size={20} />
           </button>
           <h1 className="text-2xl font-bold text-slate-100">
-            {isEditing ? `Edit ${initialAsset.id}` : `New ${type}`}
+            {isEditing ? `${t('edit')} ${initialAsset.id}` : `${t('newEntry')} ${type}`}
           </h1>
         </div>
         <div className="flex items-center space-x-3">
@@ -93,7 +95,7 @@ export const AssetForm: React.FC<AssetFormProps> = ({ initialAsset, onSubmit, on
              className="flex items-center space-x-2 px-3 py-2 text-xs font-medium bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 rounded-lg transition-colors disabled:opacity-50"
            >
              <Wand2 size={14} />
-             <span>Auto-Tag</span>
+             <span>{t('autoTag')}</span>
            </button>
            <button
              type="button"
@@ -102,7 +104,7 @@ export const AssetForm: React.FC<AssetFormProps> = ({ initialAsset, onSubmit, on
              className="flex items-center space-x-2 px-3 py-2 text-xs font-medium bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-lg transition-colors disabled:opacity-50"
            >
              <Sparkles size={14} />
-             <span>{type === AssetType.IDEA ? 'Suggest Prompt' : 'Analyze Logic'}</span>
+             <span>{type === AssetType.IDEA ? t('suggestPrompt') : t('analyzeLogic')}</span>
            </button>
         </div>
       </div>
@@ -113,7 +115,7 @@ export const AssetForm: React.FC<AssetFormProps> = ({ initialAsset, onSubmit, on
           <div className="grid grid-cols-12 gap-4">
             {!isEditing && (
               <div className="col-span-12 sm:col-span-3">
-                 <label className="block text-xs font-semibold text-slate-400 uppercase mb-1">Type</label>
+                 <label className="block text-xs font-semibold text-slate-400 uppercase mb-1">{t('type')}</label>
                  <select 
                    value={type} 
                    onChange={(e) => setType(e.target.value as AssetType)}
@@ -126,7 +128,7 @@ export const AssetForm: React.FC<AssetFormProps> = ({ initialAsset, onSubmit, on
             )}
             
             <div className={`${isEditing ? 'col-span-12' : 'col-span-12 sm:col-span-9'}`}>
-              <label className="block text-xs font-semibold text-slate-400 uppercase mb-1">Title</label>
+              <label className="block text-xs font-semibold text-slate-400 uppercase mb-1">{t('title')}</label>
               <input 
                 required
                 type="text" 
@@ -138,7 +140,7 @@ export const AssetForm: React.FC<AssetFormProps> = ({ initialAsset, onSubmit, on
             </div>
             
             <div className="col-span-12 sm:col-span-6">
-              <label className="block text-xs font-semibold text-slate-400 uppercase mb-1">Category</label>
+              <label className="block text-xs font-semibold text-slate-400 uppercase mb-1">{t('category')}</label>
               <input 
                 type="text" 
                 list="category-suggestions"
@@ -153,7 +155,7 @@ export const AssetForm: React.FC<AssetFormProps> = ({ initialAsset, onSubmit, on
             </div>
             
             <div className="col-span-12 sm:col-span-6">
-              <label className="block text-xs font-semibold text-slate-400 uppercase mb-1">Tags (comma separated)</label>
+              <label className="block text-xs font-semibold text-slate-400 uppercase mb-1">{t('tags')}</label>
               <input 
                 type="text" 
                 value={tags}
@@ -167,7 +169,7 @@ export const AssetForm: React.FC<AssetFormProps> = ({ initialAsset, onSubmit, on
           {/* Content Editor */}
           <div className="flex-1 flex flex-col min-h-[300px]">
             <label className="block text-xs font-semibold text-slate-400 uppercase mb-1">
-               {type === AssetType.PROMPT ? 'Prompt Content' : 'Idea Description'}
+               {type === AssetType.PROMPT ? t('promptContent') : t('ideaDesc')}
             </label>
             <textarea 
               required
@@ -181,7 +183,7 @@ export const AssetForm: React.FC<AssetFormProps> = ({ initialAsset, onSubmit, on
           {/* Changelog for Edits */}
           {isEditing && (
             <div>
-               <label className="block text-xs font-semibold text-slate-400 uppercase mb-1">Version Remarks / Changelog</label>
+               <label className="block text-xs font-semibold text-slate-400 uppercase mb-1">{t('versionRemarks')}</label>
                <input 
                  required
                  type="text" 
@@ -199,7 +201,7 @@ export const AssetForm: React.FC<AssetFormProps> = ({ initialAsset, onSubmit, on
                className="flex items-center space-x-2 px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium transition-colors shadow-lg shadow-primary-900/20"
              >
                <Save size={18} />
-               <span>{isEditing ? 'Save New Version' : 'Create Asset'}</span>
+               <span>{isEditing ? t('saveNewVersion') : t('createAsset')}</span>
              </button>
           </div>
         </div>
@@ -209,13 +211,13 @@ export const AssetForm: React.FC<AssetFormProps> = ({ initialAsset, onSubmit, on
           <div className="w-80 border-l border-slate-700 pl-6 flex flex-col animate-slideInRight">
              <div className="flex items-center gap-2 mb-4 text-amber-400 font-semibold">
                <Sparkles size={18} />
-               <h2>Architect Feedback</h2>
+               <h2>{t('architectFeedback')}</h2>
              </div>
              
              {isThinking ? (
                 <div className="flex-1 flex flex-col items-center justify-center text-slate-500">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500 mb-2"></div>
-                  <span className="text-xs">Analyzing...</span>
+                  <span className="text-xs">{t('analyzing')}</span>
                 </div>
              ) : (
                 <div className="flex-1 overflow-y-auto text-sm text-slate-300 space-y-2 bg-slate-800/30 p-3 rounded-lg border border-slate-700/50">

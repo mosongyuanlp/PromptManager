@@ -8,8 +8,10 @@ import { AssetForm } from './components/AssetForm';
 import { AuthScreen } from './components/AuthScreen';
 import { SettingsModal } from './components/SettingsModal';
 import { Layout, Plus, Search, Download, Terminal, Command, LogOut, Settings } from 'lucide-react';
+import { useTranslation } from './contexts/LanguageContext';
 
 const App: React.FC = () => {
+  const { t } = useTranslation();
   // Auth State
   const [user, setUser] = useState<User | null>(null);
   const [showSettings, setShowSettings] = useState(false);
@@ -166,7 +168,7 @@ const App: React.FC = () => {
           </div>
           <div>
             <h1 className="font-bold text-sm text-slate-100 tracking-wide">LIFECYCLE</h1>
-            <p className="text-[10px] text-slate-500 uppercase tracking-wider">Prompt Architect</p>
+            <p className="text-[10px] text-slate-500 uppercase tracking-wider">{t('appName')}</p>
           </div>
         </div>
 
@@ -176,14 +178,14 @@ const App: React.FC = () => {
             className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${activeTab === 'ALL' && view === 'LIST' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'}`}
           >
             <Layout size={18} />
-            <span>Dashboard</span>
+            <span>{t('dashboard')}</span>
           </button>
           <button 
             onClick={() => { setView('LIST'); setActiveTab('PROMPTS'); }}
             className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${activeTab === 'PROMPTS' && view === 'LIST' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'}`}
           >
             <Terminal size={18} />
-            <span>Prompts</span>
+            <span>{t('prompts')}</span>
           </button>
           <button 
              onClick={() => { setView('LIST'); setActiveTab('IDEAS'); }}
@@ -193,7 +195,7 @@ const App: React.FC = () => {
               <div className="absolute -top-1 -right-1 w-2 h-2 bg-amber-500 rounded-full animate-pulse" />
               <Terminal size={18} />
             </div>
-            <span>Ideas</span>
+            <span>{t('ideas')}</span>
           </button>
         </nav>
 
@@ -205,7 +207,7 @@ const App: React.FC = () => {
                 </div>
                 <div className="flex-1 overflow-hidden">
                     <p className="text-sm font-medium text-slate-200 truncate">{user.username}</p>
-                    <p className="text-[10px] text-slate-500">Free Plan</p>
+                    <p className="text-[10px] text-slate-500">{t('freePlan')}</p>
                 </div>
             </div>
             
@@ -214,21 +216,21 @@ const App: React.FC = () => {
              className="w-full flex items-center space-x-3 px-4 py-2 rounded-lg text-xs font-medium text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-colors"
            >
              <Settings size={14} />
-             <span>Settings & API Key</span>
+             <span>{t('settings')}</span>
            </button>
            <button 
              onClick={() => exportData(assets)}
              className="w-full flex items-center space-x-3 px-4 py-2 rounded-lg text-xs font-medium text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-colors"
            >
              <Download size={14} />
-             <span>Export Data</span>
+             <span>{t('export')}</span>
            </button>
            <button 
              onClick={handleLogout}
              className="w-full flex items-center space-x-3 px-4 py-2 rounded-lg text-xs font-medium text-red-400 hover:bg-red-500/10 transition-colors"
            >
              <LogOut size={14} />
-             <span>Sign Out</span>
+             <span>{t('signOut')}</span>
            </button>
         </div>
       </aside>
@@ -238,7 +240,7 @@ const App: React.FC = () => {
         
         {/* Top Mobile Bar */}
         <div className="md:hidden p-4 border-b border-slate-800 bg-slate-900 flex justify-between items-center sticky top-0 z-30">
-          <span className="font-bold text-sm">Prompt Architect</span>
+          <span className="font-bold text-sm">{t('appName')}</span>
           <div className="flex gap-2">
              <button onClick={() => setShowSettings(true)} className="p-2"><Settings size={18}/></button>
              <button onClick={() => setView('LIST')} className="p-2"><Layout size={18}/></button>
@@ -253,10 +255,10 @@ const App: React.FC = () => {
                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                   <div>
                     <h2 className="text-3xl font-bold text-slate-100">
-                      {activeTab === 'ALL' ? 'Overview' : activeTab === 'PROMPTS' ? 'Prompts Library' : 'Idea Board'}
+                      {activeTab === 'ALL' ? t('overview') : activeTab === 'PROMPTS' ? t('promptsLibrary') : t('ideaBoard')}
                     </h2>
                     <p className="text-slate-400 text-sm mt-1">
-                      Managing {filteredAssets.length} assets
+                      {t('managing')} {filteredAssets.length} {t('assets')}
                     </p>
                   </div>
                   <button 
@@ -264,7 +266,7 @@ const App: React.FC = () => {
                     className="flex items-center space-x-2 bg-primary-600 hover:bg-primary-700 text-white px-5 py-2.5 rounded-lg font-medium transition-all shadow-lg shadow-primary-900/20 active:scale-95"
                   >
                     <Plus size={20} />
-                    <span>New Entry</span>
+                    <span>{t('newEntry')}</span>
                   </button>
                </div>
 
@@ -273,7 +275,7 @@ const App: React.FC = () => {
                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-primary-400 transition-colors" size={20} />
                  <input 
                    type="text" 
-                   placeholder="Search by title, tag, or ID..."
+                   placeholder={t('searchPlaceholder')}
                    value={searchQuery}
                    onChange={(e) => setSearchQuery(e.target.value)}
                    className="w-full bg-slate-900 border border-slate-800 rounded-xl py-4 pl-12 pr-4 text-slate-200 focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500/50 outline-none transition-all placeholder-slate-600 shadow-sm"
@@ -288,7 +290,7 @@ const App: React.FC = () => {
                    ))
                  ) : (
                    <div className="col-span-full py-20 text-center text-slate-500 border-2 border-dashed border-slate-800 rounded-xl bg-slate-900/30">
-                     <p>No assets found. Start by creating a new prompt or idea.</p>
+                     <p>{t('noAssets')}</p>
                    </div>
                  )}
                </div>
