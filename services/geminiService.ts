@@ -1,8 +1,13 @@
 import { GoogleGenAI } from "@google/genai";
+import { getCurrentUser } from "./authService";
 
 const getAIClient = () => {
-  const apiKey = process.env.API_KEY;
-  if (!apiKey) throw new Error("API Key not found");
+  const user = getCurrentUser();
+  // Prioritize User API Key, then Environment Variable
+  const apiKey = user?.apiKey || process.env.API_KEY;
+  
+  if (!apiKey) throw new Error("API Key not found. Please configure it in Settings.");
+  
   return new GoogleGenAI({ apiKey });
 };
 
@@ -36,8 +41,11 @@ export const generateSuggestions = async (content: string, type: 'PROMPT' | 'IDE
     });
 
     return response.text;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Gemini API Error:", error);
+    if (error.message?.includes("API Key")) {
+        return "Error: Missing API Key. Please add your Google Gemini API Key in Settings.";
+    }
     return "AI Assistant unavailable. Please check your API configuration.";
   }
 };

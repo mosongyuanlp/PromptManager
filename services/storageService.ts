@@ -1,13 +1,26 @@
 import { Asset } from "../types";
 import { MOCK_DATA } from "../constants";
 
-const STORAGE_KEY = "prompt_lifecycle_architect_data";
+const GLOBAL_STORAGE_KEY = "prompt_lifecycle_architect_data";
 
-export const getAssets = (): Asset[] => {
-  const data = localStorage.getItem(STORAGE_KEY);
+// Helper to get key based on user
+const getStorageKey = (userId?: string) => {
+    if (!userId) return GLOBAL_STORAGE_KEY;
+    return `prompt_lifecycle_architect_data_${userId}`;
+}
+
+export const getAssets = (userId?: string): Asset[] => {
+  const key = getStorageKey(userId);
+  const data = localStorage.getItem(key);
+  
   if (!data) {
-    // Initialize with mock data if empty
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(MOCK_DATA));
+    // If user specific and empty, we could initialize with empty or mock.
+    // Let's initialize with empty for new users to avoid clutter.
+    if (userId) {
+        return [];
+    }
+    // Fallback for guest mode (backward compatibility)
+    localStorage.setItem(key, JSON.stringify(MOCK_DATA));
     return MOCK_DATA as Asset[];
   }
   try {
@@ -18,8 +31,9 @@ export const getAssets = (): Asset[] => {
   }
 };
 
-export const saveAssets = (assets: Asset[]) => {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(assets));
+export const saveAssets = (assets: Asset[], userId?: string) => {
+  const key = getStorageKey(userId);
+  localStorage.setItem(key, JSON.stringify(assets));
 };
 
 export const exportData = (assets: Asset[]) => {

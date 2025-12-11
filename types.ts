@@ -23,6 +23,14 @@ export interface Asset {
   updatedAt: number;
 }
 
+export interface User {
+  id: string;
+  username: string;
+  password?: string; // Stored locally for simulation
+  apiKey?: string;
+  createdAt: number;
+}
+
 export type AssetFilter = 'ALL' | AssetType.PROMPT | AssetType.IDEA;
 
 export interface SortOption {

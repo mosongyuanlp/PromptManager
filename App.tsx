@@ -1,12 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { Asset, AssetType } from './types';
+import { Asset, AssetType, User } from './types';
 import { getAssets, saveAssets, exportData } from './services/storageService';
+import { getCurrentUser, logout } from './services/authService';
 import { AssetCard } from './components/AssetCard';
 import { AssetDetail } from './components/AssetDetail';
 import { AssetForm } from './components/AssetForm';
-import { Layout, Plus, Search, Download, Terminal, Command } from 'lucide-react';
+import { AuthScreen } from './components/AuthScreen';
+import { SettingsModal } from './components/SettingsModal';
+import { Layout, Plus, Search, Download, Terminal, Command, LogOut, Settings } from 'lucide-react';
 
 const App: React.FC = () => {
+  // Auth State
+  const [user, setUser] = useState<User | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
+
   // Navigation State
   const [view, setView] = useState<'LIST' | 'DETAIL' | 'FORM'>('LIST');
   const [activeTab, setActiveTab] = useState<'ALL' | 'PROMPTS' | 'IDEAS'>('ALL');
@@ -16,17 +23,42 @@ const App: React.FC = () => {
   const [selectedAssetId, setSelectedAssetId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   
-  // Initialization
+  // Initialization - Check Auth
   useEffect(() => {
-    setAssets(getAssets());
+    const currentUser = getCurrentUser();
+    if (currentUser) {
+      setUser(currentUser);
+    }
   }, []);
+
+  // Load Assets when User changes
+  useEffect(() => {
+    if (user) {
+      setAssets(getAssets(user.id));
+      setView('LIST'); // Reset view on login
+    } else {
+      setAssets([]);
+    }
+  }, [user]);
 
   // Persistence
   useEffect(() => {
-    if (assets.length > 0) {
-      saveAssets(assets);
+    if (user && assets.length > 0) {
+      saveAssets(assets, user.id);
+    } else if (user && assets.length === 0) {
+       // Also save empty state to avoid reverting to mocks if logic changes
+       saveAssets([], user.id);
     }
-  }, [assets]);
+  }, [assets, user]);
+
+  const handleLogout = () => {
+    logout();
+    setUser(null);
+  };
+
+  if (!user) {
+    return <AuthScreen onAuthSuccess={setUser} />;
+  }
 
   // Derived State
   const filteredAssets = assets.filter(asset => {
@@ -117,6 +149,15 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-200 font-sans selection:bg-primary-500/30">
+      
+      {showSettings && (
+        <SettingsModal 
+          user={user} 
+          onClose={() => setShowSettings(false)} 
+          onUpdateUser={setUser}
+        />
+      )}
+
       {/* Sidebar */}
       <aside className="fixed left-0 top-0 h-full w-64 bg-slate-900 border-r border-slate-800 flex flex-col z-20 hidden md:flex">
         <div className="p-6 border-b border-slate-800 flex items-center gap-3">
@@ -156,13 +197,38 @@ const App: React.FC = () => {
           </button>
         </nav>
 
-        <div className="p-4 border-t border-slate-800">
+        {/* User Info & Settings */}
+        <div className="p-4 border-t border-slate-800 space-y-2">
+            <div className="flex items-center gap-3 px-2 mb-2">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary-500 to-indigo-600 flex items-center justify-center text-xs font-bold text-white uppercase">
+                    {user.username.substring(0,2)}
+                </div>
+                <div className="flex-1 overflow-hidden">
+                    <p className="text-sm font-medium text-slate-200 truncate">{user.username}</p>
+                    <p className="text-[10px] text-slate-500">Free Plan</p>
+                </div>
+            </div>
+            
+           <button 
+             onClick={() => setShowSettings(true)}
+             className="w-full flex items-center space-x-3 px-4 py-2 rounded-lg text-xs font-medium text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-colors"
+           >
+             <Settings size={14} />
+             <span>Settings & API Key</span>
+           </button>
            <button 
              onClick={() => exportData(assets)}
-             className="w-full flex items-center justify-center space-x-2 px-4 py-2 border border-slate-700 rounded-lg text-xs text-slate-400 hover:bg-slate-800 transition-colors"
+             className="w-full flex items-center space-x-3 px-4 py-2 rounded-lg text-xs font-medium text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-colors"
            >
              <Download size={14} />
              <span>Export Data</span>
+           </button>
+           <button 
+             onClick={handleLogout}
+             className="w-full flex items-center space-x-3 px-4 py-2 rounded-lg text-xs font-medium text-red-400 hover:bg-red-500/10 transition-colors"
+           >
+             <LogOut size={14} />
+             <span>Sign Out</span>
            </button>
         </div>
       </aside>
@@ -172,8 +238,11 @@ const App: React.FC = () => {
         
         {/* Top Mobile Bar */}
         <div className="md:hidden p-4 border-b border-slate-800 bg-slate-900 flex justify-between items-center sticky top-0 z-30">
-          <span className="font-bold">Prompt Architect</span>
-          <button onClick={() => setView('LIST')} className="p-2"><Layout /></button>
+          <span className="font-bold text-sm">Prompt Architect</span>
+          <div className="flex gap-2">
+             <button onClick={() => setShowSettings(true)} className="p-2"><Settings size={18}/></button>
+             <button onClick={() => setView('LIST')} className="p-2"><Layout size={18}/></button>
+          </div>
         </div>
 
         <div className="flex-1 p-6 md:p-10 max-w-7xl w-full mx-auto">
